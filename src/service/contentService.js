@@ -645,7 +645,7 @@ function reviewContentAPI (req, response) {
     function (res) {
       logger.debug({
         msg: 'Getting the response  from content provider',
-      }, req)
+      }, res)
       rspObj.result.content_id = res.result.node_id
       rspObj.result.versionKey = res.result.versionKey
       emailService.reviewContentEmail(req, function () { })
