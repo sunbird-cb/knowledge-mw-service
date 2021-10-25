@@ -613,6 +613,9 @@ function reviewContentAPI (req, response) {
       }, req)
       contentProvider.reviewContent(ekStepReqData, data.contentId, req.headers, function (err, res) {
         // After check response, we perform other operation
+        logger.debug({
+          msg: 'Inside content provider review content',
+        }, req)
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.errCode = res && res.params ? res.params.err : contentMessage.REVIEW.FAILED_CODE
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.REVIEW.FAILED_MESSAGE
@@ -632,11 +635,17 @@ function reviewContentAPI (req, response) {
           rspObj = utilsService.getErrorResponse(rspObj, res)
           return response.status(httpStatus).send(respUtil.errorResponse(rspObj))
         } else {
+          logger.debug({
+            msg: 'Inside content provider review content else condition',
+          }, req)
           CBW(null, res)
         }
       })
     },
     function (res) {
+      logger.debug({
+        msg: 'Getting the response  from content provider',
+      }, req)
       rspObj.result.content_id = res.result.node_id
       rspObj.result.versionKey = res.result.versionKey
       emailService.reviewContentEmail(req, function () { })
