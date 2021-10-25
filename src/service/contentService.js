@@ -603,7 +603,7 @@ function reviewContentAPI (req, response) {
 
   async.waterfall([
 
-    function (CBW) {
+    function (CBW) {  
       logger.debug({
         msg: 'Request to content provider to review the content',
         additionalInfo: {
@@ -613,9 +613,7 @@ function reviewContentAPI (req, response) {
       }, req)
       contentProvider.reviewContent(ekStepReqData, data.contentId, req.headers, function (err, res) {
         // After check response, we perform other operation
-        logger.debug({
-          msg: 'Inside content provider review content',
-        }, res)
+        logger.debug({msg: 'Inside content provider review content', res: res.responseCode}, req)
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.errCode = res && res.params ? res.params.err : contentMessage.REVIEW.FAILED_CODE
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.REVIEW.FAILED_MESSAGE
@@ -635,9 +633,8 @@ function reviewContentAPI (req, response) {
           rspObj = utilsService.getErrorResponse(rspObj, res)
           return response.status(httpStatus).send(respUtil.errorResponse(rspObj))
         } else {
-          logger.debug({
-            msg: 'Inside content provider review content else condition',
-          }, res)
+          logger.debug({ msg: 'Inside the content else part', res: res }, req)
+          logger.debug({ msg: 'Inside the content else part rspObj', rspObj: rspObj }, req)
           CBW(null, res)
         }
       })
