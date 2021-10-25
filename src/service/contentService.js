@@ -615,7 +615,7 @@ function reviewContentAPI (req, response) {
         // After check response, we perform other operation
         logger.debug({
           msg: 'Inside content provider review content',
-        }, req)
+        }, res)
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.errCode = res && res.params ? res.params.err : contentMessage.REVIEW.FAILED_CODE
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.REVIEW.FAILED_MESSAGE
@@ -637,7 +637,7 @@ function reviewContentAPI (req, response) {
         } else {
           logger.debug({
             msg: 'Inside content provider review content else condition',
-          }, req)
+          }, res)
           CBW(null, res)
         }
       })
