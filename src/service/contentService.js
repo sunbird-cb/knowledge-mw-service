@@ -59,7 +59,7 @@ function searchAPI (req, response) {
 }
 
 function searchContentAPI (req, response) {
-  return search(getContentTypeForContent(), req, response, ['Content'])
+  return search(getContentTypeForContent(), req, response, ['Content', 'QuestionSet'])
 }
 
 function search (defaultContentTypes, req, response, objectType) {
@@ -1749,6 +1749,10 @@ function copyContentAPI (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
   var rspObj = req.rspObj
+  var query = {}
+  if (req.query){
+    query = req.query;
+  }
 
   logger.debug({
     msg: 'contentService.copyContentAPI() called',
@@ -1792,7 +1796,7 @@ function copyContentAPI (req, response) {
           body: ekStepReqData
         }
       }, req)
-      contentProvider.copyContent(ekStepReqData, data['contentId'], req.headers, function (err, res) {
+      contentProvider.copyContentWithQuery(ekStepReqData, query, data['contentId'], req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.errCode = res && res.params ? res.params.err : contentMessage.COPY.FAILED_CODE
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.COPY.FAILED_MESSAGE
