@@ -25,8 +25,3 @@ WORKDIR /home/sunbird/mw/content/
 CMD ["node", "app.js", "&"]
 
 
-deb http://archive.debian.org/debian/ jessie main
-deb-src http://archive.debian.org/debian/ jessie main
-
-deb http://security.debian.org jessie/updates main
-deb-src http://security.debian.org jessie/updates main
