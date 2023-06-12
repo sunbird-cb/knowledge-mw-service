@@ -5,11 +5,9 @@ COPY src /opt/content/
 WORKDIR /opt/content/
 RUN npm install --unsafe-perm
 
-FROM node:8.11-slim
+FROM node:12
 MAINTAINER "Manojvv" "manojv@ilimi.in"
-RUN rm /etc/apt/sources.list \
-    && echo "deb http://archive.debian.org/debian-security jessie/updates main" >> /etc/apt/sources.list.d/jessie.list \
-    && echo "deb http://archive.debian.org/debian jessie main" >> /etc/apt/sources.list.d/jessie.list \
+RUN sed -i 's/stretch/buster/' /etc/apt/sources.list \
     && apt update && apt install openssl imagemagick -y \
     && apt-get clean \
     && useradd -m sunbird
