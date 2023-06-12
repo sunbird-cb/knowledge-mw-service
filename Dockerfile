@@ -7,7 +7,10 @@ RUN npm install --unsafe-perm
 
 FROM node:8.11-slim
 MAINTAINER "Manojvv" "manojv@ilimi.in"
-RUN sed -i 's/stretch/buster/' /etc/apt/sources.list \
+RUN echo "deb http://archive.debian.org/debian/ jessie main" >> /etc/apt/sources.list \
+    && echo "deb-src http://archive.debian.org/debian/ jessie main" >> /etc/apt/sources.list \
+    && echo "deb http://archive.debian.org/debian-security jessie/updates main"  >> /etc/apt/sources.list \
+    && echo "deb-src http://archive.debian.org/debian/ jessie main" >> /etc/apt/sources.list \
     && apt update && apt install openssl imagemagick -y \
     && apt-get clean \
     && useradd -m sunbird
@@ -20,3 +23,10 @@ ENV PATH "$MAGICK_HOME/bin:$PATH"
 COPY --from=0 --chown=sunbird /opt/content /home/sunbird/mw/content
 WORKDIR /home/sunbird/mw/content/
 CMD ["node", "app.js", "&"]
+
+
+deb http://archive.debian.org/debian/ jessie main
+deb-src http://archive.debian.org/debian/ jessie main
+
+deb http://security.debian.org jessie/updates main
+deb-src http://security.debian.org jessie/updates main
