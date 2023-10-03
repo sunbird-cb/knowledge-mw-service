@@ -13,7 +13,7 @@ RUN echo "deb-src http://archive.debian.org/debian/ jessie main" >> /etc/apt/sou
 RUN echo "deb http://archive.debian.org/debian-security/ jessie/updates main" >> /etc/apt/sources.list
 RUN echo "deb-src http://archive.debian.org/debian-security/ jessie/updates main" >> /etc/apt/sources.list
 RUN apt-get -o Acquire::Check-Valid-Until=false update
-RUN apt install openssl --force-yes && apt install imagemagick --force-yes \
+RUN apt install openssl -y && apt install imagemagick --force-yes \
     && apt-get clean \
     && useradd -m sunbird
 USER sunbird
