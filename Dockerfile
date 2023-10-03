@@ -12,7 +12,7 @@ RUN echo "deb http://archive.debian.org/debian/ jessie main" > /etc/apt/sources.
 RUN echo "deb-src http://archive.debian.org/debian/ jessie main" >> /etc/apt/sources.list
 RUN echo "deb http://archive.debian.org/debian-security/ jessie/updates main" >> /etc/apt/sources.list
 RUN echo "deb-src http://archive.debian.org/debian-security/ jessie/updates main" >> /etc/apt/sources.list
-RUN apt update 
+RUN apt update -y
 RUN apt install openssl --force-yes && apt install imagemagick --force-yes \
     && apt-get clean \
     && useradd -m sunbird
