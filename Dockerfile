@@ -7,8 +7,10 @@ RUN npm install --unsafe-perm
 
 FROM node:8.11-slim
 MAINTAINER "Manojvv" "manojv@ilimi.in"
-RUN sed -i '/jessie-updates/d' /etc/apt/sources.list \
-    && apt update && apt install openssl imagemagick -y \
+RUN echo "deb http://archive.debian.org/debian-security jessie/updates main" >> /etc/apt/sources.list.d/jessie.list
+
+RUN echo "deb http://archive.debian.org/debian jessie main" >> /etc/apt/sources.list.d/jessie.list
+RUN apt update && apt install openssl imagemagick -y \
     && apt-get clean \
     && useradd -m sunbird
 USER sunbird
