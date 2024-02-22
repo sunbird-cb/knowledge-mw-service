@@ -965,7 +965,7 @@ function retireContentAPI (req, response) {
           }
         }
       }
-      contentProvider.compositeSearch(ekStepReqData, req.headers, function (err, res) {
+      contentProvider.compositeSearchV4(ekStepReqData, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.errCode = res && res.params ? res.params.err : contentMessage.SEARCH.FAILED_CODE
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.SEARCH.FAILED_MESSAGE
