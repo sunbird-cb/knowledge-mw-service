@@ -29,6 +29,7 @@ var contentMessage = messageUtils.CONTENT
 var compositeMessage = messageUtils.COMPOSITE
 var responseCode = messageUtils.RESPONSE_CODE
 var reqMsg = messageUtils.REQUEST
+var reqMsgRetire = messageUtils.DOMAIN
 
 /**
  * This function helps to generate code for create course
@@ -993,12 +994,24 @@ function retireContentAPI (req, response) {
     function (res, CBW) {
       var createdByOfContents = _.uniq(_.pluck(res.result.content, 'createdBy'))
       if (createdByOfContents.length === 1 && createdByOfContents[0] === userId) {
-        CBW()
+        CBW(null, res)
       } else {
         rspObj.errCode = reqMsg.TOKEN.INVALID_CODE
         rspObj.errMsg = reqMsg.TOKEN.INVALID_MESSAGE
         rspObj.responseCode = responseCode.UNAUTHORIZED_ACCESS
         return response.status(401).send(respUtil.errorResponse(rspObj))
+      }
+    },
+
+    function (res, CBW) {
+      var status = _.uniq(_.pluck(res.result.content, 'status'))
+      if (status.length === 1 && status[0] === 'Draft') {
+        CBW()
+      } else {
+        rspObj.errCode = reqMsgRetire.RETIRE_OBJECT_TYPE.RETIRE_ONLY_DRAFT_CODE
+        rspObj.errMsg = reqMsgRetire.RETIRE_OBJECT_TYPE.RETIRE_ONLY_DRAFT_MESSAGE
+        rspObj.responseCode = responseCode.CLIENT_ERROR
+        return response.status(400).send(respUtil.errorResponse(rspObj))
       }
     },
 
