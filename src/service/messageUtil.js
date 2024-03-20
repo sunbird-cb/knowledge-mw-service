@@ -406,7 +406,9 @@ exports.DOMAIN = {
     MISSING_CODE: 'ERR_RETIRE_OBJECT_TYPE_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for retire object type are missing',
     FAILED_CODE: 'ERR_RETIRE_OBJECT_TYPE_FAILED',
-    FAILED_MESSAGE: 'Retire object type failed'
+    FAILED_MESSAGE: 'Retire object type failed',
+    RETIRE_ONLY_DRAFT_CODE: 'ERR_RETIRE_OBJECT_FAILED_DRAFT',
+    RETIRE_ONLY_DRAFT_MESSAGE: 'Status should be draft to retire'
   }
 }
 
