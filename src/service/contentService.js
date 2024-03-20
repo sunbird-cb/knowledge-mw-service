@@ -1010,8 +1010,8 @@ function retireContentAPI (req, response) {
       } else {
         rspObj.errCode = reqMsgRetire.RETIRE_OBJECT_TYPE.RETIRE_ONLY_DRAFT_CODE
         rspObj.errMsg = reqMsgRetire.RETIRE_OBJECT_TYPE.RETIRE_ONLY_DRAFT_MESSAGE
-        rspObj.responseCode = responseCode.UNAUTHORIZED_ACCESS
-        return response.status(401).send(respUtil.errorResponse(rspObj))
+        rspObj.responseCode = responseCode.CLIENT_ERROR
+        return response.status(400).send(respUtil.errorResponse(rspObj))
       }
     },
 
