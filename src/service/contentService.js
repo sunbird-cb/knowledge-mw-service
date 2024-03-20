@@ -1001,9 +1001,7 @@ function retireContentAPI (req, response) {
         rspObj.responseCode = responseCode.UNAUTHORIZED_ACCESS
         return response.status(401).send(respUtil.errorResponse(rspObj))
       }
-    },
 
-    function (res, CBW) {
       var status = _.uniq(_.pluck(res.result.content, 'status'))
       if (status.length === 1 && status[0] === 'Draft') {
         CBW()
