@@ -994,14 +994,16 @@ function retireContentAPI (req, response) {
     function (res, CBW) {
       var createdByOfContents = _.uniq(_.pluck(res.result.content, 'createdBy'))
       if (createdByOfContents.length === 1 && createdByOfContents[0] === userId) {
-        CBW()
+        CBW(null, res)
       } else {
         rspObj.errCode = reqMsg.TOKEN.INVALID_CODE
         rspObj.errMsg = reqMsg.TOKEN.INVALID_MESSAGE
         rspObj.responseCode = responseCode.UNAUTHORIZED_ACCESS
         return response.status(401).send(respUtil.errorResponse(rspObj))
       }
+    },
 
+    function (res, CBW) {
       var status = _.uniq(_.pluck(res.result.content, 'status'))
       if (status.length === 1 && status[0] === 'Draft') {
         CBW()
