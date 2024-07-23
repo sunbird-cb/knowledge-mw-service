@@ -258,7 +258,7 @@ function frameworkTermRetire (req, response) {
 
     function (CBW) {
       logger.debug({ msg: 'Request to get Framework Terms', additionalInfo: { data } }, req)
-      ekStepUtil.frameworkTermRetire(data.category, req.headers, function (err, res) {
+      ekStepUtil.frameworkTermRetire(data.category, req.headers, data.queryParams, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({
