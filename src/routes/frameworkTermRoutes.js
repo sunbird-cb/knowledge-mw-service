@@ -38,8 +38,6 @@ module.exports = function (app) {
   app.route(baseUrl + '/retire/:categoryID')
       .patch(healthService.checkDependantServiceHealth(dependentServiceHealth),
         requestMiddleware.gzipCompression(),
-        requestMiddleware.createAndValidateRequestBody, frameworkTermService.frameworkTermUpdate)
-
-
+        requestMiddleware.createAndValidateRequestBody, frameworkTermService.frameworkTermRetire)
 
 }
