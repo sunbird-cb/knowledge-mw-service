@@ -231,7 +231,65 @@ function frameworkTermUpdate (req, response) {
   ])
 }
 
+
+function frameworkTermRetire (req, response) {
+  var data = {}
+  var rspObj = req.rspObj
+
+  data.body = req.body
+  data.category = req.params.categoryID
+  data.queryParams = req.query
+  // Adding telemetry object data
+  if (rspObj.telemetryData) {
+    rspObj.telemetryData.object = utilsService.getObjectData(data.category, 'frameworkTerm', '', {})
+  }
+
+  if (!data.queryParams) {
+    rspObj.responseCode = responseCode.CLIENT_ERROR
+    logger.error({
+      msg: 'Error due to missing query Parameters',
+      err: {responseCode: rspObj.responseCode},
+      additionalInfo: { data }
+    }, req)
+    return response.status(400).send(respUtil.errorResponse(rspObj))
+  }
+
+  async.waterfall([
+
+    function (CBW) {
+      logger.debug({ msg: 'Request to get Framework Terms', additionalInfo: { data } }, req)
+      ekStepUtil.frameworkTermRetire(data.category, req.headers, data.queryParams, function (err, res) {
+        if (err || res.responseCode !== responseCode.SUCCESS) {
+          rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+          logger.error({
+            msg: 'Error while fetching framework terms from ekstep',
+            err: {
+              err,
+              responseCode: rspObj.responseCode
+            },
+            additionalInfo: {data}
+          }, req)
+          var httpStatus = res && res.statusCode >= 100 && res.statusCode < 600 ? res.statusCode : 500
+          rspObj.result = res && res.result ? res.result : {}
+          rspObj = utilsService.getErrorResponse(rspObj, res)
+          return response.status(httpStatus).send(respUtil.errorResponse(rspObj))
+        } else {
+          CBW(null, res)
+        }
+      })
+    },
+
+    function (res) {
+      rspObj.result = res.result
+      return response.status(200).send(respUtil.successResponse(rspObj))
+    }
+  ])
+}
+
+
+
 module.exports.getFrameworkTerm = getFrameworkTerm
 module.exports.frameworkTermSearch = frameworkTermSearch
 module.exports.frameworkTermCreate = frameworkTermCreate
 module.exports.frameworkTermUpdate = frameworkTermUpdate
+module.exports.frameworkTermRetire = frameworkTermRetire
