@@ -236,6 +236,7 @@ function frameworkTermRetire(req, response) {
   var data = req.body;
   var rspObj = req.rspObj;
   data.queryParams = req.query;
+  data.category = req.params.categoryID
   var failedContent = [];
   var userId = req.headers['x-authenticated-userid'];
   var errCode, errMsg, respCode, httpStatus;
