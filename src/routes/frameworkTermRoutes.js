@@ -38,4 +38,5 @@ module.exports = function (app) {
       .delete(healthService.checkDependantServiceHealth(dependentServiceHealth),
         requestMiddleware.gzipCompression(),
         requestMiddleware.createAndValidateRequestBody, frameworkTermService.frameworkTermRetire)
+
 }
