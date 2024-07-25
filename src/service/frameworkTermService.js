@@ -233,22 +233,28 @@ function frameworkTermUpdate (req, response) {
 
 
 function frameworkTermRetire (req, response) {
-  var data = {}
+  var data = req.body
   var rspObj = req.rspObj
-
-  data.body = req.body
-  data.category = req.params.categoryID
   data.queryParams = req.query
-  // Adding telemetry object data
-  if (rspObj.telemetryData) {
-    rspObj.telemetryData.object = utilsService.getObjectData(data.category, 'frameworkTerm', '', {})
-  }
+  var failedContent = []
+  var userId = req.headers['x-authenticated-userid']
+  var errCode, errMsg, respCode, httpStatus
 
-  if (!data.queryParams) {
+  logger.debug({
+    msg: 'frameworkTermService.frameworkTermRetire() called', additionalInfo: { rspObj }
+  }, req)
+
+  if (!data.request || !data.request.contentIds) {
+    rspObj.errCode = contentMessage.RETIRE.MISSING_CODE
+    rspObj.errMsg = contentMessage.RETIRE.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
-      msg: 'Error due to missing query Parameters',
-      err: {responseCode: rspObj.responseCode},
+      msg: 'Error due to required request ||  request.contentIds are missing',
+      err: {
+        errCode: rspObj.errCode,
+        errMsg: rspObj.errMsg,
+        responseCode: rspObj.responseCode
+      },
       additionalInfo: { data }
     }, req)
     return response.status(400).send(respUtil.errorResponse(rspObj))
@@ -257,36 +263,94 @@ function frameworkTermRetire (req, response) {
   async.waterfall([
 
     function (CBW) {
-      logger.debug({ msg: 'Request to get Framework Terms', additionalInfo: { data } }, req)
-      ekStepUtil.frameworkTermRetire(data.category, req.headers, data.queryParams, function (err, res) {
-        if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
-          logger.error({
-            msg: 'Error while fetching framework terms from ekstep',
-            err: {
-              err,
-              responseCode: rspObj.responseCode
-            },
-            additionalInfo: {data}
-          }, req)
-          var httpStatus = res && res.statusCode >= 100 && res.statusCode < 600 ? res.statusCode : 500
-          rspObj.result = res && res.result ? res.result : {}
-          rspObj = utilsService.getErrorResponse(rspObj, res)
+      var ekStepReqData = {
+        request: {
+          filters: {
+            identifier: data.request.contentIds,
+            status: []
+          }
+        }
+      }
+    },
+
+    function (res, CBW) {
+      var createdByOfContents = _.uniq(_.pluck(res.result.content, 'createdBy'))
+      if (createdByOfContents.length === 1 && createdByOfContents[0] === userId) {
+        CBW(null, res)
+      } else {
+        rspObj.errCode = reqMsg.TOKEN.INVALID_CODE
+        rspObj.errMsg = reqMsg.TOKEN.INVALID_MESSAGE
+        rspObj.responseCode = responseCode.UNAUTHORIZED_ACCESS
+        return response.status(401).send(respUtil.errorResponse(rspObj))
+      }
+    },
+
+    function (res, CBW) {
+      var status = _.uniq(_.pluck(res.result.content, 'status'))
+      if (status.length === 1 && status[0] === 'Draft') {
+        CBW()
+      } else {
+        rspObj.errCode = reqMsgRetire.RETIRE_OBJECT_TYPE.RETIRE_ONLY_DRAFT_CODE
+        rspObj.errMsg = reqMsgRetire.RETIRE_OBJECT_TYPE.RETIRE_ONLY_DRAFT_MESSAGE
+        rspObj.responseCode = responseCode.CLIENT_ERROR
+        return response.status(400).send(respUtil.errorResponse(rspObj))
+      }
+    },
+
+    function (CBW) {
+      async.each(data.request.contentIds, function (contentId, CBE) {
+        logger.debug({
+          msg: 'Request to content provider to retire content',
+          additionalInfo: {
+            contentId: contentId
+          }
+        }, req)
+
+        // Adding objectData in telemetry
+        if (rspObj.telemetryData) {
+          rspObj.telemetryData.object = utilsService.getObjectData(contentId, 'content', '', {})
+        }
+        ekStepUtil.frameworkTermRetire(contentId, req.headers, data.queryParams, function (err, res) {
+          if (err || res.responseCode !== responseCode.SUCCESS) {
+            errCode = res && res.params ? res.params.err : contentMessage.GET_MY.FAILED_CODE
+            errMsg = res && res.params ? res.params.errmsg : contentMessage.GET_MY.FAILED_MESSAGE
+            respCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+            logger.error({
+              msg: 'Getting error from framework term provider while retiring term',
+              err: {
+                err,
+                errCode: rspObj.errCode,
+                errMsg: rspObj.errMsg,
+                responseCode: rspObj.responseCode
+              },
+              additionalInfo: { contentId }
+            }, req)
+            httpStatus = res && res.statusCode >= 100 && res.statusCode < 600 ? res.statusCode : 500
+            rspObj.result = res && res.result ? res.result : {}
+            failedContent.push({ contentId: contentId, errCode: errCode, errMsg: errMsg })
+          }
+          CBE(null, null)
+        })
+      }, function () {
+        if (failedContent.length > 0) {
+          rspObj.errCode = errCode
+          rspObj.errMsg = errMsg
+          rspObj.responseCode = respCode
+          rspObj.result = failedContent
           return response.status(httpStatus).send(respUtil.errorResponse(rspObj))
         } else {
-          CBW(null, res)
+          CBW()
         }
       })
     },
+    function () {
+      rspObj.result = failedContent
+      logger.debug({ msg: 'Sending response back to user', res: rspObj }, req)
 
-    function (res) {
-      rspObj.result = res.result
       return response.status(200).send(respUtil.successResponse(rspObj))
     }
   ])
 }
-
-
 
 module.exports.getFrameworkTerm = getFrameworkTerm
 module.exports.frameworkTermSearch = frameworkTermSearch
