@@ -274,7 +274,7 @@ function frameworkTermRetire (req, response) {
     },
 
     function (res, CBW) {
-      var createdByOfContents = _.uniq(_.pluck(res.result.content, 'createdBy'))
+      var createdByOfContents = _.uniq(_.pluck(res.result.term, 'createdBy'))
       if (createdByOfContents.length === 1 && createdByOfContents[0] === userId) {
         CBW(null, res)
       } else {
@@ -286,7 +286,7 @@ function frameworkTermRetire (req, response) {
     },
 
     function (res, CBW) {
-      var status = _.uniq(_.pluck(res.result.content, 'status'))
+      var status = _.uniq(_.pluck(res.result.term, 'status'))
       if (status.length === 1 && status[0] === 'Draft') {
         CBW()
       } else {
@@ -308,7 +308,7 @@ function frameworkTermRetire (req, response) {
 
         // Adding objectData in telemetry
         if (rspObj.telemetryData) {
-          rspObj.telemetryData.object = utilsService.getObjectData(contentId, 'content', '', {})
+          rspObj.telemetryData.object = utilsService.getObjectData(contentId, 'term', '', {})
         }
         ekStepUtil.frameworkTermRetire(contentId, req.headers, data.queryParams, function (err, res) {
           if (err || res.responseCode !== responseCode.SUCCESS) {
