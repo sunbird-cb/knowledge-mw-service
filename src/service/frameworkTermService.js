@@ -11,7 +11,7 @@ var ekStepUtil = require('sb_content_provider_util')
 var logger = require('sb_logger_util_v2')
 var messageUtils = require('./messageUtil')
 var utilsService = require('../service/utilsService')
-
+var contentMessage = messageUtils.CONTENT
 var filename = path.basename(__filename)
 var responseCode = messageUtils.RESPONSE_CODE
 
