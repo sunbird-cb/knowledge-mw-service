@@ -346,11 +346,12 @@ function frameworkTermRetire (req, response) {
     function () {
       rspObj.result = failedContent
       logger.debug({ msg: 'Sending response back to user', res: rspObj }, req)
-
       return response.status(200).send(respUtil.successResponse(rspObj))
     }
   ])
 }
+
+
 
 module.exports.getFrameworkTerm = getFrameworkTerm
 module.exports.frameworkTermSearch = frameworkTermSearch
