@@ -236,6 +236,7 @@ function frameworkTermRetire(req, response) {
   var data = req.body;
   var rspObj = req.rspObj;
   data.queryParams = req.query;
+  data.category = req.params.categoryID
   var failedContent = [];
   var userId = req.headers['x-authenticated-userid'];
   var errCode, errMsg, respCode, httpStatus;
@@ -244,20 +245,14 @@ function frameworkTermRetire(req, response) {
     msg: 'frameworkTermService.frameworkTermRetire() called', additionalInfo: { rspObj }
   }, req);
 
-  if (!data.request || !data.request.contentIds) {
-    rspObj.errCode = contentMessage.RETIRE.MISSING_CODE;
-    rspObj.errMsg = contentMessage.RETIRE.MISSING_MESSAGE;
-    rspObj.responseCode = responseCode.CLIENT_ERROR;
+  if (!data.queryParams) {
+    rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
-      msg: 'Error due to required request || request.contentIds are missing',
-      err: {
-        errCode: rspObj.errCode,
-        errMsg: rspObj.errMsg,
-        responseCode: rspObj.responseCode
-      },
+      msg: 'Error due to missing query Parameters',
+      err: {responseCode: rspObj.responseCode},
       additionalInfo: { data }
-    }, req);
-    return response.status(400).send(respUtil.errorResponse(rspObj));
+    }, req)
+    return response.status(400).send(respUtil.errorResponse(rspObj))
   }
 
   async.each(data.request.contentIds, function (contentId, CBE) {
@@ -271,7 +266,7 @@ function frameworkTermRetire(req, response) {
       rspObj.telemetryData.object = utilsService.getObjectData(contentId, 'term', '', {});
     }
 
-    ekStepUtil.frameworkTermRetire(contentId, req.headers, data.queryParams, function (err, res) {
+    ekStepUtil.frameworkTermRetire(data.category, req.headers, data.queryParams, function (err, res) {
       if (err || res.responseCode !== responseCode.SUCCESS) {
         errCode = res && res.params ? res.params.err : contentMessage.GET_MY.FAILED_CODE;
         errMsg = res && res.params ? res.params.errmsg : contentMessage.GET_MY.FAILED_MESSAGE;
