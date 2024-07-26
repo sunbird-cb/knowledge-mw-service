@@ -35,7 +35,7 @@ module.exports = function (app) {
       requestMiddleware.createAndValidateRequestBody, frameworkTermService.frameworkTermUpdate)
 
   app.route(baseUrl + '/retire')
-      .delete(healthService.checkDependantServiceHealth(dependentServiceHealth),
+      .post(healthService.checkDependantServiceHealth(dependentServiceHealth),
         requestMiddleware.gzipCompression(),
         requestMiddleware.createAndValidateRequestBody, frameworkTermService.frameworkTermRetire)
 
