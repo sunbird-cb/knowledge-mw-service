@@ -33,4 +33,10 @@ module.exports = function (app) {
     .patch(healthService.checkDependantServiceHealth(dependentServiceHealth),
       requestMiddleware.gzipCompression(),
       requestMiddleware.createAndValidateRequestBody, frameworkTermService.frameworkTermUpdate)
+
+  app.route(baseUrl + '/retire')
+      .post(healthService.checkDependantServiceHealth(dependentServiceHealth),
+        requestMiddleware.gzipCompression(),
+        requestMiddleware.createAndValidateRequestBody, frameworkTermService.frameworkTermRetire)
+
 }

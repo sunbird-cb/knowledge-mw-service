@@ -59,6 +59,7 @@
         "FRAMEWORK_TERM_SEARCH_URI": "/framework/v3/term/search",
         "FRAMEWORK_TERM_CREATE_URI": "/framework/v3/term/create",
         "FRAMEWORK_TERM_UPDATE_URI": "/framework/v3/term/update",
+        "FRAMEWORK_Term_Retire_URI": "/framework/v3/term/retire",
 
         "FRAMEWORK_CATEGORY_INSTANCE_URI": "/framework/v3/category/read",
         "FRAMEWORK_CATEGORY_INSTANCE_SEARCH_URI": "/framework/v3/category/search",

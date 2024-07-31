@@ -11,7 +11,7 @@ var ekStepUtil = require('sb_content_provider_util')
 var logger = require('sb_logger_util_v2')
 var messageUtils = require('./messageUtil')
 var utilsService = require('../service/utilsService')
-
+var contentMessage = messageUtils.CONTENT
 var filename = path.basename(__filename)
 var responseCode = messageUtils.RESPONSE_CODE
 
@@ -231,7 +231,86 @@ function frameworkTermUpdate (req, response) {
   ])
 }
 
+
+function frameworkTermRetire(req, response) {
+  var data = req.body;
+  var rspObj = req.rspObj;
+  data.queryParams = req.query;
+  var failedContent = [];
+  var userId = req.headers['x-authenticated-userid'];
+  var errCode, errMsg, respCode, httpStatus;
+
+  logger.debug({
+    msg: 'frameworkTermService.frameworkTermRetire() called', additionalInfo: { rspObj }
+  }, req);
+
+  if (!data.request || !data.request.contentIds) {
+    rspObj.errCode = contentMessage.RETIRE.MISSING_CODE;
+    rspObj.errMsg = contentMessage.RETIRE.MISSING_MESSAGE;
+    rspObj.responseCode = responseCode.CLIENT_ERROR;
+    logger.error({
+      msg: 'Error due to required request || request.contentIds are missing',
+      err: {
+        errCode: rspObj.errCode,
+        errMsg: rspObj.errMsg,
+        responseCode: rspObj.responseCode
+      },
+      additionalInfo: { data }
+    }, req);
+    return response.status(400).send(respUtil.errorResponse(rspObj));
+  }
+
+  async.each(data.request.contentIds, function (contentId, CBE) {
+    logger.debug({
+      msg: 'Request to retire the term',
+      additionalInfo: { contentId: contentId }
+    }, req);
+
+    // Adding objectData in telemetry
+    if (rspObj.telemetryData) {
+      rspObj.telemetryData.object = utilsService.getObjectData(contentId, 'term', '', {});
+    }
+
+    ekStepUtil.frameworkTermRetire(contentId, req.headers, data.queryParams, function (err, res) {
+      if (err || res.responseCode !== responseCode.SUCCESS) {
+        errCode = res && res.params ? res.params.err : contentMessage.GET_MY.FAILED_CODE;
+        errMsg = res && res.params ? res.params.errmsg : contentMessage.GET_MY.FAILED_MESSAGE;
+        respCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR;
+        logger.error({
+          msg: 'Getting error from framework term provider while retiring term',
+          err: {
+            err,
+            errCode: rspObj.errCode,
+            errMsg: rspObj.errMsg,
+            responseCode: rspObj.responseCode
+          },
+          additionalInfo: { contentId }
+        }, req);
+        httpStatus = res && res.statusCode >= 100 && res.statusCode < 600 ? res.statusCode : 500;
+        rspObj.result = res && res.result ? res.result : {};
+        failedContent.push({ contentId: contentId, errCode: errCode, errMsg: errMsg });
+      }
+      CBE(null, null);
+    });
+  }, function () {
+    if (failedContent.length > 0) {
+      rspObj.errCode = errCode;
+      rspObj.errMsg = errMsg;
+      rspObj.responseCode = respCode;
+      rspObj.result = failedContent;
+      return response.status(httpStatus).send(respUtil.errorResponse(rspObj));
+    } else {
+      rspObj.result = failedContent;
+      logger.debug({ msg: 'Sending response back to user', res: rspObj }, req);
+      return response.status(200).send(respUtil.successResponse(rspObj));
+    }
+  });
+}
+
+
+
 module.exports.getFrameworkTerm = getFrameworkTerm
 module.exports.frameworkTermSearch = frameworkTermSearch
 module.exports.frameworkTermCreate = frameworkTermCreate
 module.exports.frameworkTermUpdate = frameworkTermUpdate
+module.exports.frameworkTermRetire = frameworkTermRetire
